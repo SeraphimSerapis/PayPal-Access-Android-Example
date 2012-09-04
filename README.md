@@ -9,7 +9,8 @@ PayPal Access is a solution for identifying users with their PayPal account. It'
 
 With using Access people are able to use their existing account instead of being forced to create new credentials and having to remember another password.
 
-All settings for Access (*Which data do you need in your client?*) can be done in PayPal's developer console: 
+All settings for Access (*Which data do you need in your client?*) can be done in PayPal's developer console:
+[Developer Portal](https://devportal.x.com/)
 
 Resources:
 ----------
