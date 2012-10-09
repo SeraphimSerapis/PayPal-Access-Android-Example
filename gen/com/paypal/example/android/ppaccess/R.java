@@ -30,6 +30,8 @@ public final class R {
         public static final int app_name=0x7f060000;
         public static final int btn_login=0x7f060003;
         public static final int login_description=0x7f060008;
+        public static final int login_oauth=0x7f060009;
+        public static final int login_openid=0x7f06000a;
         public static final int progress_loading_msg=0x7f060005;
         public static final int progress_loading_title=0x7f060004;
         public static final int title_activity_login=0x7f060002;

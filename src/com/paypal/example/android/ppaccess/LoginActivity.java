@@ -16,10 +16,6 @@
 
 package com.paypal.example.android.ppaccess;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,10 +27,11 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.paypal.example.android.ppaccess.helper.AccessHelper;
+import com.paypal.example.android.ppaccess.helper.AccessHelperConnect;
+import com.paypal.example.android.ppaccess.helper.AccessHelperOAuth;
 import com.paypal.example.android.ppaccess.http.AsyncConnection;
 import com.paypal.example.android.ppaccess.http.AsyncConnection.AsyncConnectionListener;
-import com.paypal.example.android.ppaccess.model.AccessAddress;
-import com.paypal.example.android.ppaccess.model.AccessProfile;
 
 /**
  * This {@link Activity} is used to enable the user to login at PayPal and
@@ -46,18 +43,21 @@ import com.paypal.example.android.ppaccess.model.AccessProfile;
  * 
  */
 public class LoginActivity extends Activity {
+	public static final String	TYPE			= "type";
+
 	/*
 	 * The id and secret are used to identify your application. Those
 	 * credentials can be obtained at https://devportal.x.com/
 	 */
-	private static final String	CLIENT_ID		= "";
-	private static final String	CLIENT_SECRET	= "";
+	private static final String	CLIENT_ID		= "YOUR ID";
+	private static final String	CLIENT_SECRET	= "YOUR SECRET";
 
-	private static final String	IDENTITY		= "identity";
+	private static final String	ACCESS_DENIED	= "access_denied";
 
 	private WebView				webView;
 	private ProgressDialog		progress;
 	private AccessHelper		helper;
+	private String				type;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,13 +69,22 @@ public class LoginActivity extends Activity {
 
 		setContentView(webView);
 
-		helper = AccessHelper.init(CLIENT_ID, CLIENT_SECRET);
+		type = getIntent().getStringExtra(TYPE);
 
-		progress = ProgressDialog.show(LoginActivity.this,
-				getString(R.string.progress_loading_title),
-				getString(R.string.progress_loading_msg));
+		if (type != null) {
 
-		webView.loadUrl(helper.getAuthUrl());
+			if (type.equals(AccessHelper.TYPE.OAUTH.toString())) {
+				helper = AccessHelperOAuth.init(CLIENT_ID, CLIENT_SECRET);
+			} else if (type.equals(AccessHelper.TYPE.OPENID.toString())) {
+				helper = AccessHelperConnect.init(CLIENT_ID, CLIENT_SECRET);
+			}
+
+			progress = ProgressDialog.show(LoginActivity.this,
+					getString(R.string.progress_loading_title),
+					getString(R.string.progress_loading_msg));
+
+			webView.loadUrl(helper.getAuthUrl());
+		}
 	}
 
 	private class PPWebViewClient extends WebViewClient {
@@ -91,7 +100,11 @@ public class LoginActivity extends Activity {
 
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			if (url.startsWith("http://access.com/index.php?code=")) {
+			if (url.contains(ACCESS_DENIED)) {
+				setResult(RESULT_CANCELED);
+				finish();
+				return true;
+			} else if (url.startsWith(helper.getAccessCodeUrl())) {
 				getAccessToken(url);
 				return true;
 			}
@@ -126,102 +139,11 @@ public class LoginActivity extends Activity {
 
 			new AsyncConnection(new AsyncConnectionListener() {
 				public void connectionDone(String result) {
-					try {
-						final JSONObject profile = new JSONObject(result);
-						final JSONObject identity = profile
-								.getJSONObject(IDENTITY);
-
-						final String firstName = getField(identity,
-								AccessProfile.FIRST_NAME);
-						final String lastName = getField(identity,
-								AccessProfile.LAST_NAME);
-						final String fullName = getField(identity,
-								AccessProfile.FULL_NAME);
-						final String status = getField(identity,
-								AccessProfile.STATUS);
-						final String userId = getField(identity,
-								AccessProfile.USER_ID);
-						final String telephoneNumber = getField(identity,
-								AccessProfile.TELEPHONE_NUMBER);
-						final String gender = getField(identity,
-								AccessProfile.GENDER);
-						final String dob = getField(identity, AccessProfile.DOB);
-						final String language = getField(identity,
-								AccessProfile.LANGUAGE);
-						final String timezone = getField(identity,
-								AccessProfile.TIMEZONE);
-
-						final List<String> emailList = new ArrayList<String>();
-						JSONArray emails = null;
-						if (identity.has(AccessProfile.EMAILS)) {
-							emails = identity
-									.getJSONArray(AccessProfile.EMAILS);
-							for (int i = 0; i < emails.length(); i++) {
-								emailList.add(emails.getString(i));
-							}
-						}
-
-						final List<AccessAddress> addressList = new ArrayList<AccessAddress>();
-						JSONArray addresses = null;
-						if (identity.has(AccessProfile.ADDRESSES)) {
-							addresses = identity
-									.getJSONArray(AccessProfile.ADDRESSES);
-							for (int i = 0; i < addresses.length(); i++) {
-								addressList.add(createAddress(addresses
-										.getJSONObject(i)));
-							}
-						}
-
-						final AccessProfile accessProfile = new AccessProfile(
-								firstName, lastName, fullName, status, userId,
-								telephoneNumber, gender, dob, timezone,
-								language, emailList, addressList);
-
-						setResult(RESULT_OK, new Intent().putExtra(
-								AccessHelper.DATA_PROFILE, accessProfile));
-						finish();
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
+					setResult(RESULT_OK, new Intent().putExtra(
+							AccessHelper.DATA_PROFILE, result));
+					finish();
 				}
 			}).execute(AsyncConnection.METHOD_GET, urlString);
 		}
-	}
-
-	/**
-	 * Creates a new {@link AccessAddress}.
-	 * 
-	 * @param addressField
-	 *            the returned {@link JSONObject}
-	 * @return the address
-	 */
-	private static AccessAddress createAddress(JSONObject addressField) {
-		final String state = getField(addressField, AccessAddress.STATE);
-		final String street1 = getField(addressField, AccessAddress.STREET_1);
-		final String street2 = getField(addressField, AccessAddress.STREET_2);
-		final String zip = getField(addressField, AccessAddress.ZIP);
-		final String city = getField(addressField, AccessAddress.CITY);
-		final String country = getField(addressField, AccessAddress.COUNTRY);
-		return new AccessAddress(state, country, street1, street2, city, zip);
-	}
-
-	/**
-	 * Returns the defined field as a {@link String}
-	 * 
-	 * @param object
-	 *            the {@link JSONObject} to get the value from
-	 * @param name
-	 *            the field's name
-	 * @return the field's value if existant, <code>null</code> otherwise
-	 */
-	private static String getField(JSONObject object, String name) {
-		if (object.has(name)) {
-			try {
-				return object.getString(name);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
 	}
 }

@@ -23,7 +23,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.paypal.example.android.ppaccess.model.AccessProfile;
+import com.paypal.example.android.ppaccess.helper.AccessHelper;
+import com.paypal.example.android.ppaccess.helper.AccessHelperOAuth;
 
 /**
  * The application's main {@link Activity}.<br/>
@@ -42,21 +43,29 @@ public class MainActivity extends Activity {
 		profileText = (TextView) findViewById(R.id.main_text_profile);
 	}
 
-	public void onLoginClick(View view) {
-		startActivityForResult(new Intent(this, LoginActivity.class),
-				R.id.LOGIN_REQUEST);
+	public void onOAuthClick(View view) {
+		login(AccessHelper.TYPE.OAUTH);
+	}
+
+	public void onOpenIDClick(View view) {
+		login(AccessHelper.TYPE.OPENID);
+	}
+
+	private void login(AccessHelper.TYPE type) {
+		final Intent loginIntent = new Intent(this, LoginActivity.class);
+		loginIntent.putExtra(LoginActivity.TYPE, type.toString());
+		startActivityForResult(loginIntent, R.id.LOGIN_REQUEST);
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == R.id.LOGIN_REQUEST && resultCode == RESULT_OK) {
-			final AccessProfile profile = (AccessProfile) data
-					.getSerializableExtra(AccessHelper.DATA_PROFILE);
 			Toast.makeText(getApplicationContext(), R.string.toast_login_ok,
 					Toast.LENGTH_LONG).show();
 
 			// Set the raw json representation as content of the TextView
-			profileText.setText(profile.toString());
+			profileText.setText(data
+					.getStringExtra(AccessHelperOAuth.DATA_PROFILE));
 		} else {
 			Toast.makeText(getApplicationContext(),
 					R.string.toast_login_failed, Toast.LENGTH_LONG).show();

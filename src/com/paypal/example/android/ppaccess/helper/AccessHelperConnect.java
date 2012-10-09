@@ -14,36 +14,24 @@
  * limitations under the License.
  */
 
-package com.paypal.example.android.ppaccess;
+package com.paypal.example.android.ppaccess.helper;
 
 import android.net.Uri;
 
 /**
- * This class is used to enable fast usage of PayPal Access and OAuth 2.0.
+ * This class is used to enable fast usage of PayPal Access and OpenID Connect.
  * 
  * @author tmesserschmidt@paypal.com
  * 
  */
-public class AccessHelper {
-	public static final String	DATA_PROFILE		= "profile";
+public class AccessHelperConnect extends AccessHelper {
+	public static final String	TOKEN_URL			= URL_REDIRECT
+															+ "?scope=profile&code=";
+	private static final String	URL_AUTHORIZE		= "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize";
+	private static final String	URL_TOKENSERVICE	= "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/tokenservice";
+	private static final String	URL_PROFILE			= "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/userinfo";
 
-	private static final String	URL_AUTHORIZE		= "https://identity.x.com/xidentity/resources/authorize";
-	private static final String	URL_TOKENSERVICE	= "https://identity.x.com/xidentity/oauthtokenservice";
-	private static final String	URL_PROFILE			= "https://identity.x.com/xidentity/resources/profile/me";
-	private static final String	URL_REDIRECT		= "http://access.com/index.php";
-
-	private static final String	PARAM_CLIENT_ID		= "client_id=";
-	private static final String	PARAM_CLIENT_SECRET	= "client_secret=";
-	private static final String	PARAM_REDIRECT_URI	= "redirect_uri=";
-	private static final String	PARAM_SCOPE			= "scope=";
-	private static final String	PARAM_RESPONSE_TYPE	= "response_type=";
-	private static final String	PARAM_CODE			= "code=";
-	private static final String	PARAM_OAUTH_TOKEN	= "oauth_token=";
-	private static final String	PARAM_GRANT_TYPE	= "grant_type=authorization_code";
-	private static final String	VALUE_RESPONSE_TYPE	= "code";
-
-	private static String		valueClientId		= null;
-	private static String		valueClientSecret	= null;
+	private static final String	SCHEMA				= "openid";
 
 	/**
 	 * Initializes an instance of AccessHelper and returns it.
@@ -52,9 +40,9 @@ public class AccessHelper {
 	 * @param clientSecret
 	 * @return the AccessHelper
 	 */
-	public static AccessHelper init(final String clientId,
+	public static AccessHelperConnect init(final String clientId,
 			final String clientSecret) {
-		return new AccessHelper(clientId, clientSecret);
+		return new AccessHelperConnect(clientId, clientSecret);
 	}
 
 	/**
@@ -63,9 +51,8 @@ public class AccessHelper {
 	 * @param clientId
 	 * @param clientSecret
 	 */
-	private AccessHelper(final String clientId, final String clientSecret) {
-		valueClientId = clientId;
-		valueClientSecret = clientSecret;
+	private AccessHelperConnect(final String clientId, final String clientSecret) {
+		super(clientId, clientSecret);
 	}
 
 	/**
@@ -77,7 +64,7 @@ public class AccessHelper {
 		final StringBuilder authUrlBuilder = new StringBuilder();
 		authUrlBuilder.append(URL_AUTHORIZE).append("?")
 				.append(PARAM_CLIENT_ID).append(valueClientId).append("&")
-				.append(PARAM_SCOPE).append(URL_PROFILE).append("&")
+				.append(PARAM_SCOPE).append(DATA_PROFILE).append("&")
 				.append(PARAM_REDIRECT_URI).append(Uri.encode(URL_REDIRECT))
 				.append("&").append(PARAM_RESPONSE_TYPE)
 				.append(VALUE_RESPONSE_TYPE);
@@ -85,9 +72,9 @@ public class AccessHelper {
 	}
 
 	/**
-	 * Returns the access token url.
+	 * Returns the Access Token url.
 	 * 
-	 * @return the access token url
+	 * @return the Access Token url
 	 */
 	public String getTokenServiceUrl() {
 		return URL_TOKENSERVICE;
@@ -118,8 +105,19 @@ public class AccessHelper {
 	 */
 	public String getProfileUrl(final String accessToken) {
 		final StringBuilder urlBuilder = new StringBuilder();
-		urlBuilder.append(URL_PROFILE).append("?").append(PARAM_OAUTH_TOKEN)
+		urlBuilder.append(URL_PROFILE).append("?").append(PARAM_SCHEMA)
+				.append(SCHEMA).append("&").append(PARAM_ACCESS_TOKEN)
 				.append(accessToken);
 		return urlBuilder.toString();
+	}
+
+	/**
+	 * Returns the URL which can be converted to an URI to extract the access
+	 * code
+	 * 
+	 * @return the callback URL
+	 */
+	public String getAccessCodeUrl() {
+		return TOKEN_URL;
 	}
 }
