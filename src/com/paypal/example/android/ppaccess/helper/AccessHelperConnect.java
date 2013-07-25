@@ -24,14 +24,41 @@ import android.net.Uri;
  * @author tmesserschmidt@paypal.com
  * 
  */
-public class AccessHelperConnect extends AccessHelper {
-	public static final String	TOKEN_URL			= URL_REDIRECT
-															+ "?scope=profile&code=";
+public class AccessHelperConnect {
+	public static final String	DATA_PROFILE		= Uri.encode("profile email address https://uri.paypal.com/services/paypalattributes");
+	private static final String	URL_REDIRECT		= "http://localhost:3000/";
+
+	private static final String	PARAM_CLIENT_ID		= "client_id=";
+	private static final String	PARAM_CLIENT_SECRET	= "client_secret=";
+	private static final String	PARAM_REDIRECT_URI	= "redirect_uri=";
+	private static final String	PARAM_SCOPE			= "scope=";
+	private static final String	PARAM_SCHEMA		= "schema=";
+	private static final String	PARAM_RESPONSE_TYPE	= "response_type=";
+	private static final String	PARAM_CODE			= "code=";
+	private static final String	PARAM_ACCESS_TOKEN	= "access_token=";
+	private static final String	PARAM_GRANT_TYPE	= "grant_type=authorization_code";
+	private static final String	VALUE_RESPONSE_TYPE	= "code";
 	private static final String	URL_AUTHORIZE		= "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize";
-	private static final String	URL_TOKENSERVICE	= "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/tokenservice";
-	private static final String	URL_PROFILE			= "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/userinfo";
+	private static final String	URL_TOKENSERVICE	= "https://api.paypal.com/v1/identity/openidconnect/tokenservice";
+	private static final String	URL_PROFILE			= "https://api.paypal.com/v1/identity/openidconnect/userinfo";
 
 	private static final String	SCHEMA				= "openid";
+
+	private static String		valueClientId		= null;
+	private static String		valueClientSecret	= null;
+
+	public static final String	TOKEN_URL			= URL_REDIRECT + "?scope";
+
+	/**
+	 * Not going to be exposed.
+	 * 
+	 * @param clientId
+	 * @param clientSecret
+	 */
+	public AccessHelperConnect(final String clientId, final String clientSecret) {
+		valueClientId = clientId;
+		valueClientSecret = clientSecret;
+	}
 
 	/**
 	 * Initializes an instance of AccessHelper and returns it.
@@ -43,16 +70,6 @@ public class AccessHelperConnect extends AccessHelper {
 	public static AccessHelperConnect init(final String clientId,
 			final String clientSecret) {
 		return new AccessHelperConnect(clientId, clientSecret);
-	}
-
-	/**
-	 * Not going to be exposed.
-	 * 
-	 * @param clientId
-	 * @param clientSecret
-	 */
-	private AccessHelperConnect(final String clientId, final String clientSecret) {
-		super(clientId, clientSecret);
 	}
 
 	/**
@@ -119,5 +136,14 @@ public class AccessHelperConnect extends AccessHelper {
 	 */
 	public String getAccessCodeUrl() {
 		return TOKEN_URL;
+	}
+
+	/**
+	 * Returns the code parameter that can be used to check incoming URLs
+	 * 
+	 * @return the code parameter
+	 */
+	public String getCodeParameter() {
+		return PARAM_CODE;
 	}
 }

@@ -18,7 +18,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="@dimen/padding_medium" >
+    android:padding="@dimen/padding_large" >
 
     <TextView
         android:layout_width="match_parent"
@@ -26,21 +26,7 @@
         android:gravity="center"
         android:paddingTop="@dimen/padding_medium"
         android:text="@string/login_description"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingTop="@dimen/padding_medium"
-        android:text="@string/login_oauth"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="onOAuthClick"
-        android:text="@string/btn_login" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:layout_width="match_parent"
@@ -48,10 +34,10 @@
         android:gravity="center"
         android:paddingTop="@dimen/padding_medium"
         android:text="@string/login_openid"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:onClick="onOpenIDClick"
         android:text="@string/btn_login" />

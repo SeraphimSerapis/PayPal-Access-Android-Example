@@ -27,9 +27,7 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.paypal.example.android.ppaccess.helper.AccessHelper;
 import com.paypal.example.android.ppaccess.helper.AccessHelperConnect;
-import com.paypal.example.android.ppaccess.helper.AccessHelperOAuth;
 import com.paypal.example.android.ppaccess.http.AsyncConnection;
 import com.paypal.example.android.ppaccess.http.AsyncConnection.AsyncConnectionListener;
 
@@ -47,7 +45,7 @@ public class LoginActivity extends Activity {
 
 	/*
 	 * The id and secret are used to identify your application. Those
-	 * credentials can be obtained at https://devportal.x.com/
+	 * credentials can be obtained at developer.papyal.com
 	 */
 	private static final String	CLIENT_ID		= "YOUR ID";
 	private static final String	CLIENT_SECRET	= "YOUR SECRET";
@@ -56,8 +54,7 @@ public class LoginActivity extends Activity {
 
 	private WebView				webView;
 	private ProgressDialog		progress;
-	private AccessHelper		helper;
-	private String				type;
+	private AccessHelperConnect	helper;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,22 +66,13 @@ public class LoginActivity extends Activity {
 
 		setContentView(webView);
 
-		type = getIntent().getStringExtra(TYPE);
+		helper = AccessHelperConnect.init(CLIENT_ID, CLIENT_SECRET);
 
-		if (type != null) {
+		progress = ProgressDialog.show(LoginActivity.this,
+				getString(R.string.progress_loading_title),
+				getString(R.string.progress_loading_msg));
 
-			if (type.equals(AccessHelper.TYPE.OAUTH.toString())) {
-				helper = AccessHelperOAuth.init(CLIENT_ID, CLIENT_SECRET);
-			} else if (type.equals(AccessHelper.TYPE.OPENID.toString())) {
-				helper = AccessHelperConnect.init(CLIENT_ID, CLIENT_SECRET);
-			}
-
-			progress = ProgressDialog.show(LoginActivity.this,
-					getString(R.string.progress_loading_title),
-					getString(R.string.progress_loading_msg));
-
-			webView.loadUrl(helper.getAuthUrl());
-		}
+		webView.loadUrl(helper.getAuthUrl());
 	}
 
 	private class PPWebViewClient extends WebViewClient {
@@ -100,11 +88,13 @@ public class LoginActivity extends Activity {
 
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			System.out.println("URL: " + url);
 			if (url.contains(ACCESS_DENIED)) {
 				setResult(RESULT_CANCELED);
 				finish();
 				return true;
-			} else if (url.startsWith(helper.getAccessCodeUrl())) {
+			} else if (url.startsWith(helper.getAccessCodeUrl())
+					&& url.contains(helper.getCodeParameter())) {
 				getAccessToken(url);
 				return true;
 			}
@@ -140,7 +130,7 @@ public class LoginActivity extends Activity {
 			new AsyncConnection(new AsyncConnectionListener() {
 				public void connectionDone(String result) {
 					setResult(RESULT_OK, new Intent().putExtra(
-							AccessHelper.DATA_PROFILE, result));
+							AccessHelperConnect.DATA_PROFILE, result));
 					finish();
 				}
 			}).execute(AsyncConnection.METHOD_GET, urlString);

@@ -26,5 +26,5 @@
     <string name="toast_login_failed">Login failed</string>
     <string name="login_description">This enables the user to use his PayPal credentials to login. Thus he doesn\'t have to create yet another account and remember yet another password.</string>
 	<string name="login_oauth">OAuth 2.0</string>
-	<string name="login_openid">OpenID Connect</string>
+	<string name="login_openid">OpenID</string>
 </resources>

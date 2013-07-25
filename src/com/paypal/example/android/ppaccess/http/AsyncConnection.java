@@ -64,7 +64,7 @@ public class AsyncConnection extends AsyncTask<String, Void, String> {
 				final String urlParams = params[2];
 				conn.setRequestProperty(HTTP.CONTENT_LEN,
 						"" + Integer.toString(urlParams.getBytes().length));
-
+				System.out.println(urlParams);
 				// Send request
 				final DataOutputStream wr = new DataOutputStream(
 						conn.getOutputStream());
