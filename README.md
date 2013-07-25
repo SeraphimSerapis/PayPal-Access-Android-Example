@@ -1,21 +1,17 @@
 PayPal Access Helper & Demo 4 Android
 ==========================
 
-An example Android app that integrates PayPal Access via both OpenID Connect & OAuth 2.
+An example Android app that integrates PayPal's Log In with PayPal (former PayPal Access) via OpenID Connect.
 
-What is PayPal Access?
+What is Log In with PayPal / PayPal Access?
 ----------------------
-PayPal Access is a solution for identifying users with their PayPal account. It's implementation can be done via OpenID Connect & OAuth 2.0.
-
-With using Access users are able to use their existing account instead of being forced to create new credentials and having to remember another password.
-
-All settings for Access (*Which data do you need in your client?*) can be done in PayPal's developer console:
-[Developer Portal](https://devportal.x.com/)
+It's a solution for authenticating and authorizing users by using their existing PayPal account.
+The needed credentials can be obtained by registering an application over at PayPal's [Developer Portal](https://developer.paypal.com/webapps/developer/applications/myapps)
 
 Resources:
 ----------
 If you're looking for more information you can check out:
-* [x.com/identity](x.com/identiy) the official documentation
+* [Log In with PayPal Documentation](https://developer.paypal.com/webapps/developer/docs/integration/direct/log-in-with-paypal/detailed/) the official documentation
 
 ---------
 Developer:
